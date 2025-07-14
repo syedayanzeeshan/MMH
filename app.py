@@ -1,9 +1,13 @@
 from flask import Flask, render_template, request, redirect, session, url_for
 import sqlite3
+import os
 
 app = Flask(__name__)
-app.secret_key = 'dev_secret'
-app.debug = True
+# FIXED: Secret key should not be hardcoded in production
+app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'dev_secret')
+# FIXED: Debug mode should not be enabled in production
+# app.debug = True
+
 
 def get_db():
     conn = sqlite3.connect('mmh.db')
@@ -23,7 +27,8 @@ def register():
         u = request.form['username']
         p = request.form['password']
         db = get_db()
-        db.execute(f"INSERT INTO users (username, password) VALUES ('{u}','{p}')")
+        # FIXED: Use parameterized query to prevent SQL injection
+        db.execute("INSERT INTO users (username, password) VALUES (?, ?)", (u, p))
         db.commit()
         return redirect(url_for('login'))
     return render_template('register.html')
@@ -35,9 +40,10 @@ def login():
         p = request.form['password']
 
         db = get_db()
-        query = f"SELECT * FROM users WHERE username = '{u}' AND password = '{p}'"
+        # FIXED: Use parameterized query to prevent SQL injection
+        query = "SELECT * FROM users WHERE username = ? AND password = ?"
         print("DEBUG:", query)
-        user = db.execute(query).fetchone()
+        user = db.execute(query, (u, p)).fetchone()
 
         if user:
             session['user_id'] = user['id']
@@ -64,16 +70,18 @@ def comment():
 @app.route('/profile/<int:user_id>')
 def profile(user_id):
     db = get_db()
-    user = db.execute(f"SELECT * FROM users WHERE id = {user_id}").fetchone()
-    if not user:
-        return 'Not found'
+    user = db.execute("SELECT * FROM users WHERE id = ?", (user_id,)).fetchone()
+    # FIXED: Prevent IDOR - Only allow access to own profile
+    if not user or user['id'] != session.get('user_id'):
+        return 'Unauthorized or not found', 403
     return render_template('profile.html', user=user)
 
 @app.route('/delete-comment', methods=('POST',))
 def delete_comment():
     cid = request.form['comment_id']
     db = get_db()
-    db.execute(f"DELETE FROM comments WHERE id = {cid}")
+    # FIXED: Use parameterized query to prevent SQL injection
+    db.execute("DELETE FROM comments WHERE id = ?", (cid,))
     db.commit()
     return redirect(url_for('index'))
 
