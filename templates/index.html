@@ -2,16 +2,18 @@
 {% block content %}
 <h2>Post a Comment</h2>
 <form method="POST" action="/comment">
+  <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
   <input name="comment" placeholder="message"><button>Post</button>
 </form>
 <h3>Comments:</h3>
 <ul>
 {% for c in comments %}
-  <li><strong>{{ c.username }}:</strong> {{ c.comment|safe }}</li>
+  <p><strong>{{ c.username }}</strong>: {{ c.comment| e }}</p>
 {% endfor %}
 </ul>
 <h2>Delete Comment</h2>
 <form method="POST" action="/delete-comment">
+  <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
   <input name="comment_id" placeholder="comment id">
   <button>Delete</button>
 </form>
