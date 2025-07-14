@@ -77,5 +77,10 @@ def delete_comment():
     db.commit()
     return redirect(url_for('index'))
 
+@app.route('/crash')
+def crash():
+    return 1 / 0  # Division by zero causes error
+
 if __name__ == '__main__':
+    app.debug=True
     app.run()
