@@ -107,6 +107,9 @@ def delete_comment():
     db.commit()
     return redirect(url_for('index'))
 
+@app.route('/crash')
+def crash():
+    return 1 / 0  # Simulate runtime exception
 
 if __name__ == '__main__':
     app.run()
