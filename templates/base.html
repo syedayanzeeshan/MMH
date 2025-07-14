@@ -1,8 +1,57 @@
-<!DOCTYPE html><html><head><title>MMH</title></head><body>
-<nav>
-  <a href="/">Home</a> |
-  <a href="/register">Register</a> |
-  <a href="/login">Login</a>
-</nav>
-<hr>{% block content %}{% endblock %}
-</body></html>
+<!DOCTYPE html>
+<html>
+<head>
+  <title>MMH</title>
+  <style>
+    body {
+      background-color: #000;
+      color: #ccc;
+      font-family: 'Segoe UI', sans-serif;
+      padding: 20px;
+    }
+    nav {
+      margin-bottom: 20px;
+    }
+    nav a {
+      color: #f06;
+      text-decoration: none;
+      margin-right: 15px;
+      font-weight: bold;
+    }
+    nav a:hover {
+      color: #a5f;
+    }
+    input, button {
+      margin: 5px 0;
+      padding: 5px;
+      border: none;
+      border-radius: 3px;
+    }
+    input {
+      background: #222;
+      color: #fff;
+    }
+    button {
+      background: #f06;
+      color: white;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #a5f;
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="/">Home</a>
+    <a href="/register">Register</a>
+    <a href="/login">Login</a>
+    {% if username %}
+      <span style="color:#9f9;">Logged in as: {{ username }}</span>
+      <a href="/logout">Logout</a>
+    {% endif %}
+  </nav>
+  <hr>
+  {% block content %}{% endblock %}
+</body>
+</html>

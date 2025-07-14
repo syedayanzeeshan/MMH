@@ -14,7 +14,8 @@ def get_db():
 def index():
     db = get_db()
     comments = db.execute("SELECT * FROM comments").fetchall()
-    return render_template('index.html', comments=comments)
+    username = session.get('username')
+    return render_template('index.html', comments=comments, username=username)
 
 @app.route('/register', methods=('GET', 'POST'))
 def register():
@@ -32,14 +33,24 @@ def login():
     if request.method == 'POST':
         u = request.form['username']
         p = request.form['password']
+
         db = get_db()
-        user = db.execute(f"SELECT * FROM users WHERE username = '{u}' AND password = '{p}'").fetchone()
+        query = f"SELECT * FROM users WHERE username = '{u}' AND password = '{p}'"
+        print("DEBUG:", query)
+        user = db.execute(query).fetchone()
+
         if user:
             session['user_id'] = user['id']
             session['username'] = user['username']
             return redirect(url_for('index'))
         return 'Login failed'
+
     return render_template('login.html')
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('index'))
 
 @app.route('/comment', methods=('POST',))
 def comment():
